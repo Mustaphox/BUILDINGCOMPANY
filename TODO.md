@@ -1,0 +1,6 @@
+- [x] Install Git using winget
+- [ ] Initialize Git repository in the current directory
+- [ ] Add remote origin to https://github.com/Mustaphox/BUILDINGCOMPANY.git
+- [ ] Add all files to Git
+- [ ] Commit changes with a message
+- [ ] Push to the main branch

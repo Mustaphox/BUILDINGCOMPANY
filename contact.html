@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تواصل معنا — شركة البناء</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="logo">
+        <svg width="140" height="40" viewBox="0 0 280 80" xmlns="http://www.w3.org/2000/svg" aria-label="شعار الشركة">
+          <rect width="280" height="80" rx="8" fill="#c62828"></rect>
+          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-family="Tajawal, sans-serif" font-size="28"><tspan class="lang ar">شركة البناء</tspan><tspan class="lang en">Construction Co.</tspan></text>
+        </svg>
+      </div>
+      <nav class="main-nav" aria-label="القائمة الرئيسية">
+        <button class="nav-toggle" aria-controls="nav-list" aria-expanded="false">☰</button>
+        <ul id="nav-list" class="nav-list">
+          <li><a href="index.html"><span class="lang ar">الرئيسية</span><span class="lang en">Home</span></a></li>
+          <li><a href="about.html"><span class="lang ar">من نحن</span><span class="lang en">About</span></a></li>
+          <li><a href="projects.html"><span class="lang ar">المشاريع</span><span class="lang en">Projects</span></a></li>
+          <li><a href="news.html"><span class="lang ar">الأخبار</span><span class="lang en">News</span></a></li>
+          <li><a href="careers.html"><span class="lang ar">التوظيف</span><span class="lang en">Careers</span></a></li>
+          <li><a href="awards.html"><span class="lang ar">الجوائز</span><span class="lang en">Awards</span></a></li>
+          <li><a href="contact.html"><span class="lang ar">تواصل معنا</span><span class="lang en">Contact</span></a></li>
+        </ul>
+      </nav>
+      <div class="lang-switch">
+        <button id="lang-toggle" aria-pressed="false" aria-label="تغيير اللغة / Toggle language">EN</button>
+      </div>
+      <div class="contact-cta">
+        <a href="contact.html" class="btn-cta"><span class="lang ar">تواصل معنا</span><span class="lang en">Contact Us</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="contact" class="container">
+      <h2 class="section-title"><span class="lang ar">تواصل معنا</span><span class="lang en">Contact Us</span></h2>
+
+      <div style="display:grid;grid-template-columns:1fr;gap:18px;max-width:720px;margin:18px auto;">
+        <form action="#" method="post" style="display:grid;gap:12px;">
+          <label><span class="lang ar">الاسم</span><span class="lang en">Name</span>
+            <input type="text" name="name" required>
+          </label>
+          <label><span class="lang ar">البريد الإلكتروني</span><span class="lang en">Email</span>
+            <input type="email" name="email" required>
+          </label>
+          <label><span class="lang ar">الموضوع</span><span class="lang en">Subject</span>
+            <input type="text" name="subject">
+          </label>
+          <label><span class="lang ar">الرسالة</span><span class="lang en">Message</span>
+            <textarea name="message" rows="6" required></textarea>
+          </label>
+          <button class="btn-cta" type="submit"><span class="lang ar">أرسل الرسالة</span><span class="lang en">Send Message</span></button>
+        </form>
+
+        <div style="background:#fff;padding:16px;border-radius:8px;">
+          <h4><span class="lang ar">مكتبنا الرئيسي</span><span class="lang en">Our Head Office</span></h4>
+          <p class="muted"><span class="lang ar">المدينة، العنوان، الهاتف</span><span class="lang en">City, address, phone</span></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <div class="logo small">
+          <svg width="120" height="36" viewBox="0 0 280 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="280" height="80" rx="8" fill="#333"></rect>
+            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-family="Tajawal, sans-serif" font-size="20"><tspan class="lang ar">شركة البناء</tspan><tspan class="lang en">Construction Co.</tspan></text>
+          </svg>
+        </div>
+        <p class="muted"><span class="lang ar">© جميع الحقوق محفوظة 1974 - شركة البناء</span><span class="lang en">© All rights reserved 1974 - Construction Co.</span></p>
+      </div>
+      <div class="footer-links">
+        <a href="index.html"><span class="lang ar">الرئيسية</span><span class="lang en">Home</span></a>
+        <a href="about.html"><span class="lang ar">من نحن</span><span class="lang en">About</span></a>
+        <a href="news.html"><span class="lang ar">الأخبار</span><span class="lang en">News</span></a>
+        <a href="projects.html"><span class="lang ar">المشاريع</span><span class="lang en">Projects</span></a>
+        <a href="careers.html"><span class="lang ar">التوظيف</span><span class="lang en">Careers</span></a>
+        <a href="awards.html"><span class="lang ar">الجوائز</span><span class="lang en">Awards</span></a>
+      </div>
+      <div class="socials">
+        <a href="#" aria-label="LinkedIn">in</a>
+        <a href="#" aria-label="Twitter">t</a>
+        <a href="#" aria-label="Facebook">f</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

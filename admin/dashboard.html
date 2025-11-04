@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - نشر الأخبار</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        .admin-panel {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .news-form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .news-form input, .news-form textarea {
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        .news-list {
+            margin-top: 2rem;
+            opacity: 0;
+            animation: fadeIn 0.6s ease 0.3s forwards;
+        }
+
+        .news-item {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        .news-item:nth-child(odd) {
+            animation: slideInRight 0.5s ease forwards;
+        }
+
+        .news-item:nth-child(even) {
+            animation: slideInLeft 0.5s ease forwards;
+        }
+
+        .btn-admin {
+            background: #4CAF50;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-admin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2);
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInRight {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* لوحة تحكم متجاوبة */
+        @media (max-width: 768px) {
+            .admin-panel {
+                margin: 1rem;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-panel">
+        <h1>لوحة التحكم - نشر الأخبار</h1>
+        
+                <form class="news-form" id="newsForm">
+                        <input type="text" id="newsTitle" placeholder="عنوان الخبر" required>
+                        <textarea id="newsContent" rows="5" placeholder="محتوى الخبر" required></textarea>
+                        <input type="url" id="newsImage" placeholder="رابط الصورة (اختياري)">
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <button type="submit" class="btn-admin" id="submitBtn">نشر الخبر</button>
+                            <button type="button" class="btn-admin" id="cancelEdit" style="background:#999;display:none;">إلغاء التعديل</button>
+                            <div id="formStatus" style="margin-left:8px;color:var(--muted)"></div>
+                        </div>
+                </form>
+
+        <div class="news-list">
+            <h2>الأخبار المنشورة</h2>
+            <div id="newsList">
+                <!-- سيتم إضافة الأخبار هنا ديناميكياً -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // إدارة الأخبار (باستخدام API إذا كان متاحاً، وإلا الاحتفاظ في localStorage كنسخة احتياطية)
+        const newsForm = document.getElementById('newsForm');
+        const newsList = document.getElementById('newsList');
+        const submitBtn = document.getElementById('submitBtn');
+        const cancelEdit = document.getElementById('cancelEdit');
+        const formStatus = document.getElementById('formStatus');
+
+    let news = [];
+    let editingId = null;
+        // If this page is opened via file:// (double-click), relative fetch calls fail —
+        // use explicit localhost:3000 as fallback so admin works when server runs locally.
+        const baseApi = (location.protocol === 'file:') ? 'http://localhost:3000' : '';
+
+        // Quick health-check to give a clearer error to the user when the API is unreachable.
+        async function checkApi() {
+            try {
+                const res = await fetch(baseApi + '/api/health', { cache: 'no-store' });
+                if (!res.ok) throw new Error('health check failed');
+                return true;
+            } catch (err) {
+                console.warn('API health check failed:', err);
+                formStatus.textContent = 'خدمة الـ API غير متاحة حالياً. تأكد من تشغيل السيرفر (npm start).';
+                submitBtn.disabled = true;
+                return false;
+            }
+        }
+
+        async function fetchNews() {
+            formStatus.textContent = 'جارٍ التحميل...';
+            try {
+                const res = await fetch(baseApi + '/api/news');
+                if (!res.ok) {
+                    let errBody = null;
+                    try { errBody = await res.json(); } catch(e){}
+                    throw new Error(errBody && errBody.error ? errBody.error : 'API not available');
+                }
+                news = await res.json();
+            } catch (err) {
+                // fallback to localStorage
+                console.warn('fetchNews error:', err);
+                formStatus.textContent = 'تعذر الاتصال بالـ API — استخدام نسخة محلية';
+                news = JSON.parse(localStorage.getItem('news') || '[]');
+            }
+            formStatus.textContent = '';
+            displayNews();
+        }
+
+        function displayNews() {
+            if (!news || news.length === 0) {
+                newsList.innerHTML = '<p>لا توجد أخبار بعد.</p>';
+                return;
+            }
+
+            newsList.innerHTML = news.map(item => `
+                <div class="news-item">
+                    <div style="max-width:72%;">
+                        <h3>${escapeHtml(item.title)}</h3>
+                        <small style="color:var(--muted);">${item.created_at ? new Date(item.created_at).toLocaleString('ar-EG') : ''}</small>
+                        <p>${escapeHtml((item.content || '').substring(0, 300))}...</p>
+                        ${item.image ? `<img src="${escapeHtml(item.image)}" alt="" style="max-width:120px;border-radius:6px;margin-top:8px;">` : ''}
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+                      <button data-id="${item.id || ''}" class="btn-admin edit-btn" style="background:#007bff">تعديل</button>
+                      <button data-id="${item.id || ''}" class="btn-admin delete-btn">حذف</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // attach delete handlers
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-id');
+                    if (id) {
+                        if (confirm('هل أنت متأكد من حذف هذا الخبر؟')) deleteNewsById(id);
+                    } else {
+                        // localStorage fallback: delete by title match
+                        const title = btn.closest('.news-item').querySelector('h3').textContent;
+                        news = news.filter(n => n.title !== title);
+                        localStorage.setItem('news', JSON.stringify(news));
+                        displayNews();
+                    }
+                });
+            });
+
+            // attach edit handlers
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-id');
+                    if (!id) return;
+                    const item = news.find(n => String(n.id) === String(id));
+                    if (!item) return;
+                    // populate form for editing
+                    document.getElementById('newsTitle').value = item.title || '';
+                    document.getElementById('newsContent').value = item.content || '';
+                    document.getElementById('newsImage').value = item.image || '';
+                    editingId = id;
+                    submitBtn.textContent = 'حفظ التعديل';
+                    cancelEdit.style.display = 'inline-block';
+                });
+            });
+        }
+
+        // escape helper
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>\"]/g, function (c) {
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+            });
+        }
+
+        // submit new news (create or update)
+        newsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('newsTitle').value.trim();
+            const content = document.getElementById('newsContent').value.trim();
+            const image = document.getElementById('newsImage').value.trim();
+
+            const payload = { title, content, image };
+            submitBtn.disabled = true;
+            submitBtn.textContent = editingId ? 'جارٍ الحفظ...' : 'جارٍ النشر...';
+
+            try {
+                let res;
+                if (editingId) {
+                    res = await fetch(baseApi + '/api/news/' + encodeURIComponent(editingId), {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                } else {
+                    res = await fetch(baseApi + '/api/news', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                }
+
+                if (!res.ok) {
+                    let errBody = null;
+                    try { errBody = await res.json(); } catch(e){}
+                    const msg = errBody && errBody.error ? errBody.error : (res.statusText || 'Failed to save');
+                    throw new Error(msg);
+                }
+                await fetchNews();
+                // reset form
+                newsForm.reset();
+                editingId = null;
+                submitBtn.textContent = 'نشر الخبر';
+                cancelEdit.style.display = 'none';
+            } catch (err) {
+                console.error('Save error:', err);
+                formStatus.textContent = 'حدث خطأ أثناء الحفظ: ' + (err.message || 'خطأ غير معروف');
+                setTimeout(()=> formStatus.textContent = '', 5000);
+            }
+
+            submitBtn.disabled = false;
+        });
+
+        cancelEdit.addEventListener('click', () => {
+            newsForm.reset();
+            editingId = null;
+            submitBtn.textContent = 'نشر الخبر';
+            cancelEdit.style.display = 'none';
+        });
+
+        async function deleteNewsById(id) {
+            try {
+                const res = await fetch(baseApi + '/api/news/' + encodeURIComponent(id), { method: 'DELETE' });
+                if (!res.ok) {
+                    let errBody = null;
+                    try { errBody = await res.json(); } catch(e){}
+                    throw new Error(errBody && errBody.error ? errBody.error : 'delete failed');
+                }
+                await fetchNews();
+            } catch (err) {
+                // nothing
+                console.warn('Delete failed', err);
+                formStatus.textContent = 'حدث خطأ أثناء الحذف: ' + (err.message || 'خطأ');
+                setTimeout(()=> formStatus.textContent = '', 4000);
+            }
+        }
+
+        // initial load: check API first to give clear feedback
+        checkApi().then((ok) => {
+            if (ok) fetchNews();
+            else {
+                // still load local news for offline editing
+                news = JSON.parse(localStorage.getItem('news') || '[]');
+                displayNews();
+            }
+        });
+    </script>
+</body>
+</html>
